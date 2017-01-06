@@ -7,7 +7,6 @@
     ]
   },
   "frameworks": {
-    "net35": { },
     "netstandard1.6": {
       "imports": "dnxcore50",
       "dependencies": {
@@ -19,5 +18,8 @@
       }
     }
   },
-  "runtimes": { "win": { } }
+  "runtimes": { "win": {} },
+  "dependencies": {
+    "Boo.CoreCompat": "1.0.0-*"
+  }
 }

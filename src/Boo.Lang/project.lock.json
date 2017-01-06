@@ -2,8 +2,6 @@
   "locked": false,
   "version": 2,
   "targets": {
-    ".NETFramework,Version=v3.5": {},
-    ".NETFramework,Version=v3.5/win": {},
     ".NETStandard,Version=v1.6": {
       "Microsoft.NETCore.Platforms/1.1.0": {
         "type": "package",
@@ -1213,6 +1211,19 @@
         },
         "runtime": {
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
+        }
+      },
+      "Boo.CoreCompat/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v1.6",
+        "dependencies": {
+          "NETStandard.Library": "1.6.0"
+        },
+        "compile": {
+          "netstandard1.6/Boo.CoreCompat.dll": {}
+        },
+        "runtime": {
+          "netstandard1.6/Boo.CoreCompat.dll": {}
         }
       }
     },
@@ -2701,6 +2712,19 @@
         },
         "runtime": {
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
+        }
+      },
+      "Boo.CoreCompat/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v1.6",
+        "dependencies": {
+          "NETStandard.Library": "1.6.0"
+        },
+        "compile": {
+          "netstandard1.6/Boo.CoreCompat.dll": {}
+        },
+        "runtime": {
+          "netstandard1.6/Boo.CoreCompat.dll": {}
         }
       }
     }
@@ -6537,11 +6561,17 @@
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._"
       ]
+    },
+    "Boo.CoreCompat/1.0.0": {
+      "type": "project",
+      "path": "../Boo.CoreCompat/project.json",
+      "msbuildProject": "../Boo.CoreCompat/Boo.CoreCompat.xproj"
     }
   },
   "projectFileDependencyGroups": {
-    "": [],
-    ".NETFramework,Version=v3.5": [],
+    "": [
+      "Boo.CoreCompat >= 1.0.0-*"
+    ],
     ".NETStandard,Version=v1.6": [
       "NETStandard.Library >= 1.6.1",
       "System.Collections.NonGeneric >= 4.3.0",

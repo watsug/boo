@@ -38,9 +38,7 @@ namespace Boo.Lang.Runtime
 	/// The AssertMacro injects code to raise this exception if the provided
 	/// condition evaluates to false.
 	/// </summary>
-#if !NO_SERIALIZATION_INFO
 	[Serializable]
-#endif
 	public class AssertionFailedException : RuntimeException
 	{
 		public AssertionFailedException(string message) : base(message)

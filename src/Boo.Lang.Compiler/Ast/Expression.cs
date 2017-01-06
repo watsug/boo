@@ -27,6 +27,7 @@
 #endregion
 
 using System;
+using System.Xml.Serialization;
 using Boo.Lang.Compiler.Util;
 
 namespace Boo.Lang.Compiler.Ast

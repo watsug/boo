@@ -580,17 +580,9 @@ namespace Boo.Lang.Runtime
 		public static object MoveNext(IEnumerator enumerator)
 		{
 			if (enumerator == null)
-#if !DNXCORE50
 				throw new ApplicationException(StringResources.CantUnpackNull);
-#else
-		        throw new Exception(StringResources.CantUnpackNull);
-#endif
 			if (!enumerator.MoveNext())
-#if !DNXCORE50
 				throw new ApplicationException(StringResources.UnpackListOfWrongSize);
-#else
-		        throw new Exception(StringResources.UnpackListOfWrongSize);
-#endif
 		    return enumerator.Current;
 		}
 
@@ -646,11 +638,7 @@ namespace Boo.Lang.Runtime
 					ranges[2 * i + 1] <= ranges[2 * i])
 				{
 					// FIXME: Better error reporting
-#if !DNXCORE50
 					throw new ApplicationException("Invalid array.");
-#else
-				    throw new Exception("Invalid array.");
-#endif
 				}
 			}
 
@@ -666,11 +654,7 @@ namespace Boo.Lang.Runtime
 
 			if (source.Rank != destSubsetRank)
 			{
-#if !DNXCORE50
 				throw new ApplicationException(String.Format("Cannot assign array of rank {0} into an array subset of rank {1}.",source.Rank,destSubsetRank));
-#else
-			    throw new Exception(String.Format("Cannot assign array of rank {0} into an array subset of rank {1}.",source.Rank,destSubsetRank));
-#endif
 			}
 			
 			int[] lensDest = new int[dest.Rank];
@@ -705,11 +689,7 @@ namespace Boo.Lang.Runtime
 					dest_subset_dims.Append(" x ");
 					dest_subset_dims.Append(lensDestSubset[i]);
 				}
-#if !DNXCORE50
 				throw new ApplicationException(String.Format("Cannot assign array with dimensions {0} into array subset of dimensions {1}.",source_dims.ToString(),dest_subset_dims.ToString()));
-#else
-			    throw new Exception(String.Format("Cannot assign array with dimensions {0} into array subset of dimensions {1}.",source_dims.ToString(),dest_subset_dims.ToString()));
-#endif
 			}
 
 			int[] prodInd = new int[source.Rank];
@@ -808,11 +788,7 @@ namespace Boo.Lang.Runtime
 		{
 			if (null == array)
 			{
-#if !DNXCORE50
 				throw new ApplicationException(StringResources.CantUnpackNull);
-#else
-			    throw new Exception(StringResources.CantUnpackNull);
-#endif
 			}
 			if (expected > array.Length)
 			{
@@ -844,11 +820,7 @@ namespace Boo.Lang.Runtime
 		public static IEnumerable GetEnumerable(object enumerable)
 		{
 			if (null == enumerable)
-#if !DNXCORE50
 				throw new ApplicationException(StringResources.CantEnumerateNull);
-#else
-		        throw new Exception(StringResources.CantEnumerateNull);
-#endif
 
 			var iterator = enumerable as IEnumerable;
 			if (null != iterator) return iterator;
@@ -856,11 +828,7 @@ namespace Boo.Lang.Runtime
 			var reader = enumerable as TextReader;
 			if (null != reader) return TextReaderEnumerator.lines(reader);
 
-#if !DNXCORE50
 			throw new ApplicationException(StringResources.ArgumentNotEnumerable);
-#else
-		    throw new Exception(StringResources.ArgumentNotEnumerable);
-#endif
 		}
 
 		#region global operators
@@ -1826,11 +1794,7 @@ namespace Boo.Lang.Runtime
 
 		static void Error(string format, params object[] args)
 		{
-#if !DNXCORE50
 			throw new ApplicationException(string.Format(format, args));
-#else
-		    throw new Exception(string.Format(format, args));
-#endif
 		}
 
 		public static string RuntimeDisplayName

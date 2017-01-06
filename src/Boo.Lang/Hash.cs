@@ -38,9 +38,7 @@ namespace Boo.Lang
 	/// <summary>
 	/// Hash.
 	/// </summary>
-#if !NO_SERIALIZATION_INFO
 	[Serializable]
-#endif
 	[EnumeratorItemType(typeof(DictionaryEntry))]
 	public class Hash : Hashtable, IEquatable<Hash>
 	{

@@ -31,9 +31,7 @@ namespace Boo.Lang
 {
 	using System;
 
-#if !NO_SERIALIZATION_INFO
     [Serializable]
-#endif
 	[AttributeUsage(AttributeTargets.Method)]
 	public class MetaAttribute : Attribute
 	{
