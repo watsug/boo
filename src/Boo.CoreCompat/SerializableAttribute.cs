@@ -5,4 +5,8 @@ namespace System
     {
     }
 }
+namespace System.Runtime.Serialization
+{
+    using System;
+}
 #endif

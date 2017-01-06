@@ -1,16 +1,18 @@
 {
   "version": "1.0.0-*",
-
   "dependencies": {
     "Boo.CoreCompat": "1.0.0-*",
     "Boo.Lang": "1.0.0-*",
     "NETStandard.Library": "1.6.1",
+    "System.Diagnostics.Process": "4.3.0",
     "System.Xml.XmlSerializer": "4.0.11"
   },
-
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50"
     }
+  },
+  "buildOptions": {
+    "define": [ "DNXCORE50" ]
   }
 }

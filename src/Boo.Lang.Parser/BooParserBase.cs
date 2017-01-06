@@ -24,8 +24,9 @@ using Boo.Lang.Compiler.Ast;
 using AstAttribute=Boo.Lang.Compiler.Ast.Attribute;
 using Boo.Lang.Parser.Util;
 using System.Globalization;
+    using System.Linq.Expressions;
 
-public delegate void ParserErrorHandler(antlr.RecognitionException x);
+    public delegate void ParserErrorHandler(antlr.RecognitionException x);
 
 abstract
 
