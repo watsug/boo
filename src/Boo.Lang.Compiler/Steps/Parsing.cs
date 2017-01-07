@@ -102,7 +102,11 @@ namespace Boo.Lang.Compiler.Steps
 
 		private static Assembly ThisAssembly()
 		{
-			return typeof(Parsing).Assembly;
-		}
-	}
+#if DNXCORE50
+            return typeof(Parsing).GetTypeInfo().Assembly;
+#else
+            return typeof(Parsing).Assembly;
+#endif
+        }
+    }
 }

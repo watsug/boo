@@ -119,10 +119,17 @@ namespace Boo.Lang.Compiler.Steps
 
 		private static AttributeUsageAttribute AttributeUsageFor(Type attrType)
 		{
-			return (AttributeUsageAttribute) System.Attribute.GetCustomAttributes(attrType, typeof(AttributeUsageAttribute)).FirstOrDefault();
+#if DNXCORE50
+		    return
+		        (AttributeUsageAttribute)
+		            CustomAttributeExtensions.GetCustomAttributes<AttributeUsageAttribute>(attrType.GetTypeInfo())
+		                .FirstOrDefault();
+#else
+            return (AttributeUsageAttribute) System.Attribute.GetCustomAttributes(attrType, typeof(AttributeUsageAttribute)).FirstOrDefault();
+#endif
 		}
 
-		private static AttributeTargets? AttributeTargetsFor(Attribute node)
+        private static AttributeTargets? AttributeTargetsFor(Attribute node)
 		{
 			var parentNode = node.ParentNode as Method;
 			if (parentNode != null)
@@ -167,10 +174,14 @@ namespace Boo.Lang.Compiler.Steps
 			var external = member as IExternalEntity;
 			if (external == null)
 				return new ObsoleteAttribute[0];
-			return System.Attribute.GetCustomAttributes(external.MemberInfo, typeof(ObsoleteAttribute)).Cast<ObsoleteAttribute>();
-		}
+#if DNXCORE50
+		    return CustomAttributeExtensions.GetCustomAttributes<ObsoleteAttribute>(external.MemberInfo);
+#else
+            return System.Attribute.GetCustomAttributes(external.MemberInfo, typeof(ObsoleteAttribute)).Cast<ObsoleteAttribute>();
+#endif
+        }
 
-		protected void OnInternalReferenceExpression(ReferenceExpression node)
+        protected void OnInternalReferenceExpression(ReferenceExpression node)
 		{
 			// TODO:
 		}

@@ -59,8 +59,9 @@ namespace Boo.Lang.Compiler.Resources
 		}
 		
 		public void WriteResource(IResourceService service)
-		{	
-			using (ResourceReader reader = new ResourceReader(this.FileName))
+		{
+#if !DNXCORE50
+            using (ResourceReader reader = new ResourceReader(this.FileName))
 			{
 				IResourceWriter writer = service.DefineResource(this.Name,  this.Description);
 				IDictionaryEnumerator e = reader.GetEnumerator();
@@ -69,6 +70,7 @@ namespace Boo.Lang.Compiler.Resources
 					writer.AddResource((string)e.Key, e.Value);
 				}
 			}
+#endif
 		}
 	}
 }

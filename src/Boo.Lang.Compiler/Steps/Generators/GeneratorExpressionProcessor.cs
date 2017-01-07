@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections;
+using System.Reflection;
 using Boo.Lang.Compiler.Ast;
 using Boo.Lang.Compiler.TypeSystem;
 using Boo.Lang.Compiler.TypeSystem.Builders;
@@ -143,12 +144,18 @@ namespace Boo.Lang.Compiler.Steps.Generators
 		
 		IMethod GetMemberwiseCloneMethod()
 		{
-			return TypeSystemServices.Map(
+#if DNXCORE50
+            return TypeSystemServices.Map(
+                typeof(object).GetTypeInfo().GetMethod("MemberwiseClone",
+                                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance));
+#else
+            return TypeSystemServices.Map(
 				typeof(object).GetMethod("MemberwiseClone",
 				                         System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance));
-		}
-		
-		MethodInvocationExpression CreateMethodInvocation(ClassDefinition cd, string name)
+#endif
+        }
+
+        MethodInvocationExpression CreateMethodInvocation(ClassDefinition cd, string name)
 		{
 			IMethod method = (IMethod)((Method)cd.Members[name]).Entity;
 			return CodeBuilder.CreateMethodInvocation(

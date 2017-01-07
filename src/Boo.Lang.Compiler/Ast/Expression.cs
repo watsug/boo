@@ -27,6 +27,7 @@
 #endregion
 
 using System;
+using System.Reflection;
 using System.Xml.Serialization;
 using Boo.Lang.Compiler.Util;
 
@@ -134,8 +135,12 @@ namespace Boo.Lang.Compiler.Ast
 
 		public static Expression Lift(Type type)
 		{
-			if (type.IsGenericType)
-				return LiftGenericType(type);
+#if DNXCORE50
+            if (type.GetTypeInfo().IsGenericType)
+#else
+            if (type.IsGenericType)
+#endif
+                return LiftGenericType(type);
 			return ReferenceExpressionFor(type);
 		}
 

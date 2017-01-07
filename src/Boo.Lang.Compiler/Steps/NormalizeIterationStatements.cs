@@ -27,6 +27,7 @@
 #endregion
 
 using System.Collections;
+using System.Reflection;
 using Boo.Lang.Compiler.TypeSystem.Internal;
 using Boo.Lang.Compiler.TypeSystem.Services;
 using Boo.Lang.Compiler.Util;
@@ -446,9 +447,13 @@ namespace Boo.Lang.Compiler.Steps
 				if (IsAssignableFrom(TypeSystemServices.IEnumerableGenericType, CurrentEnumeratorType))
 				{
 					bestEnumeratorType = TypeSystemServices.IEnumeratorGenericType;
-					_bestGetEnumerator = TypeSystemServices.Map(Types.IEnumerableGeneric.GetMethod("GetEnumerator"));
-				}
-			}
+#if DNXCORE50
+                    _bestGetEnumerator = TypeSystemServices.Map(Types.IEnumerableGeneric.GetTypeInfo().GetMethod("GetEnumerator"));
+#else
+                    _bestGetEnumerator = TypeSystemServices.Map(Types.IEnumerableGeneric.GetMethod("GetEnumerator"));
+#endif
+                }
+            }
 
 			//3) type explicitly implements IEnumerable
 			if (null == bestEnumeratorType)

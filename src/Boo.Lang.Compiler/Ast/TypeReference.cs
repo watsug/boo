@@ -27,6 +27,7 @@
 #endregion
 
 using System;
+using System.Reflection;
 
 namespace Boo.Lang.Compiler.Ast
 {
@@ -39,8 +40,12 @@ namespace Boo.Lang.Compiler.Ast
 		public static TypeReference Lift(System.Type type)
 		{
 			if (type == null) return null;
-			if (type.IsGenericType) return LiftGenericType(type);
-			return new SimpleTypeReference(FullNameOf(type));
+#if DNXCORE50
+            if (type.GetTypeInfo().IsGenericType) return LiftGenericType(type);
+#else
+            if (type.IsGenericType) return LiftGenericType(type);
+#endif
+            return new SimpleTypeReference(FullNameOf(type));
 		}
 
 		public static TypeReference Lift(string name)

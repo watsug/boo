@@ -777,10 +777,14 @@ namespace Boo.Lang.Compiler.TypeSystem
 		public static bool IsNullable(IType type)
 		{
 			var et = type as ExternalType;
-			return (null != et && et.ActualType.IsGenericType && et.ActualType.GetGenericTypeDefinition() == Types.Nullable);
-		}
+#if DNXCORE50
+            return (null != et && et.ActualType.GetTypeInfo().IsGenericType && et.ActualType.GetGenericTypeDefinition() == Types.Nullable);
+#else
+            return (null != et && et.ActualType.IsGenericType && et.ActualType.GetGenericTypeDefinition() == Types.Nullable);
+#endif
+        }
 
-		public IType GetNullableUnderlyingType(IType type)
+        public IType GetNullableUnderlyingType(IType type)
 		{
 			var et = type as ExternalType;
 			return Map(Nullable.GetUnderlyingType(et.ActualType));
@@ -1014,8 +1018,12 @@ namespace Boo.Lang.Compiler.TypeSystem
 		private IType GetExternalEnumeratorItemType(IType iteratorType)
 		{
 			Type type = ((ExternalType) iteratorType).ActualType;
-			var attribute = (EnumeratorItemTypeAttribute) Attribute.GetCustomAttribute(type, typeof(EnumeratorItemTypeAttribute));
-			return null != attribute ? Map(attribute.ItemType) : null;
+#if DNXCORE50
+            var attribute = CustomAttributeExtensions.GetCustomAttribute<EnumeratorItemTypeAttribute>(type.GetTypeInfo());
+#else
+            var attribute = (EnumeratorItemTypeAttribute) Attribute.GetCustomAttribute(type, typeof(EnumeratorItemTypeAttribute));
+#endif
+            return null != attribute ? Map(attribute.ItemType) : null;
 		}
 
 		private IType GetEnumeratorItemTypeFromAttribute(IType iteratorType)
@@ -1098,9 +1106,9 @@ namespace Boo.Lang.Compiler.TypeSystem
 
 			var et = type as ExternalType;
 			if (null != et)
-				return Marshal.SizeOf(et.ActualType);
+                return Marshal.SizeOf(et.ActualType);
 
-			int size = 0;
+            int size = 0;
 			var it = type as InternalClass;
 			if (null == it)
 				return 0;

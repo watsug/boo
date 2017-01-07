@@ -53,15 +53,19 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 
 		protected void MapTo(Type type, IType entity)
 		{
-			AssemblyReferenceFor(type.Assembly).MapTo(type, entity);
-		}
+#if DNXCORE50
+            AssemblyReferenceFor(type.GetTypeInfo().Assembly).MapTo(type, entity);
+#else
+            AssemblyReferenceFor(type.Assembly).MapTo(type, entity);
+#endif
+        }
 
-		private ReflectionTypeSystemProvider(MemoizedFunction<Assembly, AssemblyReference> referenceCache)
+        private ReflectionTypeSystemProvider(MemoizedFunction<Assembly, AssemblyReference> referenceCache)
 		{
 			_referenceCache = referenceCache;
 		}
 
-		#region Implementation of ICompilerReferenceProvider
+#region Implementation of ICompilerReferenceProvider
 
 		public IAssemblyReference ForAssembly(Assembly assembly)
 		{
@@ -78,16 +82,20 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			return new AssemblyReference(this, assembly);
 		}
 
-		#endregion
+#endregion
 
-		#region Implementation of IReflectionTypeSystemProvider
+#region Implementation of IReflectionTypeSystemProvider
 
 		public IType Map(Type type)
 		{
-			return AssemblyReferenceFor(type.Assembly).Map(type);
-		}
+#if DNXCORE50
+            return AssemblyReferenceFor(type.GetTypeInfo().Assembly).Map(type);
+#else
+            return AssemblyReferenceFor(type.Assembly).Map(type);
+#endif
+        }
 
-		public IMethod Map(MethodInfo method)
+        public IMethod Map(MethodInfo method)
 		{
 			return (IMethod) MapMember(method);
 		}
@@ -114,10 +122,14 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 
 		private IEntity MapMember(MemberInfo mi)
 		{
-			return AssemblyReferenceFor(mi.DeclaringType.Assembly).MapMember(mi);
-		}
+#if DNXCORE50
+            return AssemblyReferenceFor(mi.DeclaringType.GetTypeInfo().Assembly).MapMember(mi);
+#else
+            return AssemblyReferenceFor(mi.DeclaringType.Assembly).MapMember(mi);
+#endif
+        }
 
-		public virtual IReflectionTypeSystemProvider Clone()
+        public virtual IReflectionTypeSystemProvider Clone()
 		{
 			return new ReflectionTypeSystemProvider(_referenceCache.Clone());
 		}
@@ -148,7 +160,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			}
 		}
 
-		#endregion
+#endregion
 
 		sealed class ObjectTypeImpl : ExternalType
 		{
@@ -164,7 +176,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			}
 		}
 
-		#region VoidTypeImpl
+#region VoidTypeImpl
 		sealed class VoidTypeImpl : ExternalType
 		{
 			internal VoidTypeImpl(IReflectionTypeSystemProvider provider)
@@ -188,7 +200,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			}
 		}
 
-		#endregion
+#endregion
 
 	}
 }

@@ -40,7 +40,9 @@ namespace Boo.Lang.Compiler.Steps
 				|| Context.GeneratedAssembly == null)
 				return;
 
-			AppDomain.CurrentDomain.AssemblyResolve += ResolveGeneratedAssembly;
+#if !DNXCORE50
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveGeneratedAssembly;
+#endif
 			try
 			{
 				var entryPoint = Context.GeneratedAssembly.EntryPoint;
@@ -51,13 +53,17 @@ namespace Boo.Lang.Compiler.Steps
 			}
 			finally
 			{
+#if !DNXCORE50
 				AppDomain.CurrentDomain.AssemblyResolve -= ResolveGeneratedAssembly;
-			}
-		}
+#endif
+            }
+        }
 
+#if !DNXCORE50
 		private Assembly ResolveGeneratedAssembly(object sender, ResolveEventArgs args)
 		{
 			return args.Name == Context.GeneratedAssembly.FullName ? Context.GeneratedAssembly : null;
 		}
-	}
+#endif
+    }
 }

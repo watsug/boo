@@ -95,8 +95,12 @@ namespace Boo.Lang.Compiler.TypeSystem
 			{
 				if (!_isDuckTyped.HasValue)
 					_isDuckTyped =
-						!MemberType.IsValueType && MetadataUtil.IsAttributeDefined(_memberInfo, Types.DuckTypedAttribute);
-				return _isDuckTyped.Value;
+#if DNXCORE50
+                        !MemberType.GetTypeInfo().IsValueType && MetadataUtil.IsAttributeDefined(_memberInfo, Types.DuckTypedAttribute);
+#else
+                        !MemberType.IsValueType && MetadataUtil.IsAttributeDefined(_memberInfo, Types.DuckTypedAttribute);
+#endif
+                return _isDuckTyped.Value;
 			}
 		}
 

@@ -26,6 +26,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
+using System.Reflection;
 using Boo.Lang.Compiler.TypeSystem.Reflection;
 using Boo.Lang.Environments;
 
@@ -39,10 +40,14 @@ namespace Boo.Lang.Compiler.TypeSystem
 		
 		public ExternalCallableType(IReflectionTypeSystemProvider provider, Type type) : base(provider, type)
 		{
-			_invoke = provider.Map(type.GetMethod("Invoke"));
-		}
-		
-		public CallableSignature GetSignature()
+#if DNXCORE50
+            _invoke = provider.Map(type.GetTypeInfo().GetMethod("Invoke"));
+#else
+            _invoke = provider.Map(type.GetMethod("Invoke"));
+#endif
+        }
+
+        public CallableSignature GetSignature()
 		{
 			return _invoke.CallableType.GetSignature();
 		}

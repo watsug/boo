@@ -64,9 +64,13 @@ namespace Boo.Lang.Compiler.TypeSystem
 		}
 
 		public static bool IsAttributeDefined(MemberInfo member, Type attributeType)
-		{	
-			return System.Attribute.IsDefined(member, attributeType);
-		}
-	}
+		{
+#if DNXCORE50
+            return CustomAttributeExtensions.IsDefined(member, attributeType);
+#else
+            return System.Attribute.IsDefined(member, attributeType);
+#endif
+        }
+    }
 }
 

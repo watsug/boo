@@ -400,7 +400,8 @@ namespace Boo.Lang.Compiler.Steps
 
 			public void Run()
 			{
-				AppDomain domain = Thread.GetDomain();
+#if !DNXCORE50
+                AppDomain domain = Thread.GetDomain();
 				try
 				{
 					domain.TypeResolve += OnTypeResolve;
@@ -410,16 +411,19 @@ namespace Boo.Lang.Compiler.Steps
 				{
 					domain.TypeResolve -= OnTypeResolve;
 				}
+#endif
 			}
 
+#if !DNXCORE50
 			private Assembly OnTypeResolve(object sender, ResolveEventArgs args)
 			{
 				Trace("OnTypeResolve('{0}') during '{1}' creation.", args.Name, _current);
 				EnsureInternalFieldDependencies(_current);
 				return _emitter._asmBuilder;
 			}
+#endif
 
-			private void CreateTypes()
+            private void CreateTypes()
 			{
 				foreach (var type in _types)
 					CreateType(type);
@@ -454,7 +458,11 @@ namespace Boo.Lang.Compiler.Steps
 
 				CreateRelatedTypes(type);
 				var typeBuilder = (TypeBuilder)_emitter.GetBuilder(type);
-				typeBuilder.CreateType();
+#if DNXCORE50
+                typeBuilder.CreateTypeInfo();
+#else
+                typeBuilder.CreateType();
+#endif
 				Trace("type '{0}' successfully created", type);
 			}
 
@@ -4431,12 +4439,16 @@ namespace Boo.Lang.Compiler.Steps
 				Method method = ContextAnnotations.GetEntryPoint(Context);
 				if (null != method)
 				{
-					MethodInfo entryPoint = Context.Parameters.GenerateInMemory
+#if DNXCORE50
+                    Errors.Add(CompilerErrorFactory.CustomError("EXE genaration is not implemented on .NET Core yet!"));
+#else
+                    MethodInfo entryPoint = Context.Parameters.GenerateInMemory
 						? _asmBuilder.GetType(method.DeclaringType.FullName).GetMethod(method.Name, BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.Static)
 						: GetMethodBuilder(method);
 					_asmBuilder.SetEntryPoint(entryPoint, (PEFileKinds)Parameters.OutputType);
-				}
-				else
+#endif
+                }
+                else
 				{
 					Errors.Add(CompilerErrorFactory.NoEntryPoint());
 				}
@@ -5524,27 +5536,39 @@ namespace Boo.Lang.Compiler.Steps
 
 			public bool EmbedFile(string resourceName, string fname)
 			{
+#if !DNXCORE50
 				_moduleBuilder.DefineManifestResource(resourceName, File.OpenRead(fname), ResourceAttributes.Public);
 				return true;
+#else
+			    return false;
+#endif
 			}
 
 			public IResourceWriter DefineResource(string resourceName, string resourceDescription)
 			{
-				return _moduleBuilder.DefineResource(resourceName, resourceDescription);
+#if !DNXCORE50
+                return _moduleBuilder.DefineResource(resourceName, resourceDescription);
+#else
+			    return null;
+#endif
 			}
-		}
+        }
 
-		void SetUpAssembly()
+            void SetUpAssembly()
 		{
 			var outputFile = BuildOutputAssemblyName();
 			var asmName = CreateAssemblyName(outputFile);
 			var assemblyBuilderAccess = GetAssemblyBuilderAccess();
 			var targetDirectory = GetTargetDirectory(outputFile);
-			_asmBuilder = string.IsNullOrEmpty(targetDirectory)
+#if DNXCORE50
+            _asmBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName, assemblyBuilderAccess);
+#else
+            _asmBuilder = string.IsNullOrEmpty(targetDirectory)
 				? AppDomain.CurrentDomain.DefineDynamicAssembly(asmName, assemblyBuilderAccess)
 				: AppDomain.CurrentDomain.DefineDynamicAssembly(asmName, assemblyBuilderAccess, targetDirectory);
+#endif
 
-			if (Parameters.Debug)
+            if (Parameters.Debug)
 			{
 				// ikvm tip:  Set DebuggableAttribute to assembly before
 				// creating the module, to make sure Visual Studio (Whidbey)
@@ -5553,9 +5577,14 @@ namespace Boo.Lang.Compiler.Steps
 			}
 
 			_asmBuilder.SetCustomAttribute(CreateRuntimeCompatibilityAttribute());
-			_moduleBuilder = _asmBuilder.DefineDynamicModule(asmName.Name, Path.GetFileName(outputFile), Parameters.Debug);
+#if DNXCORE50
+            // Path.GetFileName(outputFile), , Parameters.Debug
+            _moduleBuilder = _asmBuilder.DefineDynamicModule(asmName.Name);
+#else
+            _moduleBuilder = _asmBuilder.DefineDynamicModule(asmName.Name, Path.GetFileName(outputFile), Parameters.Debug);
+#endif
 
-			if (Parameters.Unsafe)
+            if (Parameters.Unsafe)
 				_moduleBuilder.SetCustomAttribute(CreateUnverifiableCodeAttribute());
 
 			_sreResourceService = new SREResourceService (_asmBuilder, _moduleBuilder);
@@ -5566,7 +5595,12 @@ namespace Boo.Lang.Compiler.Steps
 
 		AssemblyBuilderAccess GetAssemblyBuilderAccess()
 		{
-			return Parameters.GenerateInMemory ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Save;
+#if DNXCORE50
+            // TODO: Save generated assembly...
+            return AssemblyBuilderAccess.RunAndCollect;
+#else
+            return Parameters.GenerateInMemory ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.Save;
+#endif
 		}
 
 		AssemblyName CreateAssemblyName(string outputFile)
@@ -5574,13 +5608,16 @@ namespace Boo.Lang.Compiler.Steps
 			var assemblyName = new AssemblyName();
 			assemblyName.Name = GetAssemblySimpleName(outputFile);
 			assemblyName.Version = GetAssemblyVersion();
-			if (Parameters.DelaySign)
+#if !DNXCORE50
+            if (Parameters.DelaySign)
 				assemblyName.SetPublicKey(GetAssemblyKeyPair(outputFile).PublicKey);
 			else
 				assemblyName.KeyPair = GetAssemblyKeyPair(outputFile);
+#endif
 			return assemblyName;
 		}
 
+#if !DNXCORE50
 		StrongNameKeyPair GetAssemblyKeyPair(string outputFile)
 		{
 			var attribute = GetAssemblyAttribute("System.Reflection.AssemblyKeyNameAttribute");
@@ -5627,6 +5664,7 @@ namespace Boo.Lang.Compiler.Steps
 			}
 			return null;
 		}
+#endif
 
 		string ResolveRelative(string targetFile, string srcFile, string relativeFile)
 		{

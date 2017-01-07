@@ -162,13 +162,18 @@ namespace Boo.Lang.Compiler.TypeSystem
 
 	    private PropertyInfo FindBaseProperty()
 	    {
-			if (null == _memberInfo.DeclaringType.BaseType)
+#if DNXCORE50
+	        TypeInfo _type = _memberInfo.DeclaringType.GetTypeInfo();
+#else
+	        Type _type = _memberInfo.DeclaringType;
+#endif
+            if (null == _type.BaseType)
 				return null;
 
-	        return _memberInfo.DeclaringType.BaseType.GetProperty(
-                                                        _memberInfo.Name,
-                                                        _memberInfo.PropertyType,
-                                                        GetParameterTypes(_memberInfo.GetIndexParameters()));
+	        return _type.GetProperty(
+	            _memberInfo.Name,
+	            _memberInfo.PropertyType,
+	            GetParameterTypes(_memberInfo.GetIndexParameters()));
 	    }
 
 	    private static Type[] GetParameterTypes(ParameterInfo[] parameters)

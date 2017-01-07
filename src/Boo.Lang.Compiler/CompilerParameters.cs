@@ -34,6 +34,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Boo.CoreCompat;
 using Boo.Lang.Compiler.Ast;
 using Boo.Lang.Compiler.Util;
 using Boo.Lang.Compiler.TypeSystem;
@@ -260,20 +261,33 @@ namespace Boo.Lang.Compiler
 				if (!IsAssemblyExtension(file.Extension))
 					full_path += ".dll";
 
-				try
-				{
-					a = Assembly.LoadFrom(full_path);
-					if (a != null)
-					{
-						return a;
-					}
-				}
-				catch (FileNotFoundException ff)
-				{
-					fullLog += ff.FusionLog;
-					continue;
-				}
-			}
+			    try
+			    {
+#if DNXCORE50
+			        a = AssemblyUtil.LoadFrom(full_path);
+#else
+                    a = Assembly.LoadFrom(full_path);
+#endif
+			        if (a != null)
+			        {
+			            return a;
+			        }
+			    }
+			    catch (FileNotFoundException ff)
+			    {
+#if DNXCORE50
+			        fullLog += ff.Message;
+#else
+                    fullLog += ff.FusionLog;
+#endif
+                    continue;
+			    }
+			    catch (Exception ex)
+			    {
+			        fullLog += ex.Message;
+                    continue;
+                }
+            }
 			if (throwOnError)
 			{
 				throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_CannotFindAssembly, assembly));

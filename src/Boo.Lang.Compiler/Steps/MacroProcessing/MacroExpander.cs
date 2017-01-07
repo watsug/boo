@@ -29,6 +29,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Boo.Lang.Compiler.Ast;
 using Boo.Lang.Compiler.TypeSystem;
@@ -37,6 +38,7 @@ using Boo.Lang.Compiler.TypeSystem.Internal;
 using Boo.Lang.Compiler.TypeSystem.Reflection;
 using Boo.Lang.Compiler.Util;
 using Boo.Lang.Environments;
+using Module = Boo.Lang.Compiler.Ast.Module;
 
 namespace Boo.Lang.Compiler.Steps.MacroProcessing
 {
@@ -145,8 +147,12 @@ namespace Boo.Lang.Compiler.Steps.MacroProcessing
 				return;
 			}
 
-			context.References.Add(typeof(CompilerContext).Assembly);
-			_referenced = true;
+#if DNXCORE50
+            context.References.Add(typeof(CompilerContext).GetTypeInfo().Assembly);
+#else
+            context.References.Add(typeof(CompilerContext).Assembly);
+#endif
+            _referenced = true;
 		}
 
 		override public void OnMacroStatement(MacroStatement node)

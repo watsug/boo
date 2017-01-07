@@ -98,10 +98,14 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 
 		public virtual bool IsFinal
 		{
-			get { return _type.IsSealed; }
-		}
+#if DNXCORE50
+            get { return _type.GetTypeInfo().IsSealed; }
+#else
+            get { return _type.IsSealed; }
+#endif
+        }
 
-		public bool IsByRef
+        public bool IsByRef
 		{
 			get { return _type.IsByRef; }
 		}
@@ -126,37 +130,61 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 		{
 			ExternalType type = attributeType as ExternalType;
 			if (null == type) return false;
-			return MetadataUtil.IsAttributeDefined(_type, type.ActualType);
-		}
+#if DNXCORE50
+            return MetadataUtil.IsAttributeDefined(_type.GetTypeInfo(), type.ActualType);
+#else
+            return MetadataUtil.IsAttributeDefined(_type, type.ActualType);
+#endif
+        }
 
-		public virtual IType ElementType
+        public virtual IType ElementType
 		{
 			get { return _provider.Map(_type.GetElementType() ?? _type); }
 		}
 
 		public virtual bool IsClass
 		{
-			get { return _type.IsClass; }
-		}
+#if DNXCORE50
+            get { return _type.GetTypeInfo().IsClass; }
+#else
+            get { return _type.IsClass; }
+#endif
+        }
 
-		public bool IsAbstract
+        public bool IsAbstract
 		{
-			get { return _type.IsAbstract; }
-		}
+#if DNXCORE50
+            get { return _type.GetTypeInfo().IsAbstract; }
+#else
+            get { return _type.IsAbstract; }
+#endif
+        }
 
-		public bool IsInterface
+        public bool IsInterface
 		{
-			get { return _type.IsInterface; }
-		}
+#if DNXCORE50
+            get { return _type.GetTypeInfo().IsInterface; }
+#else
+            get { return _type.IsInterface; }
+#endif
+        }
 
-		public bool IsEnum
+        public bool IsEnum
 		{
-			get { return _type.IsEnum; }
+#if DNXCORE50
+            get { return _type.GetTypeInfo().IsEnum; }
+#else
+            get { return _type.IsEnum; }
+#endif
 		}
 
 		public virtual bool IsValueType
 		{
-			get { return _type.IsValueType; }
+#if DNXCORE50
+            get { return _type.GetTypeInfo().IsValueType; }
+#else
+            get { return _type.IsValueType; }
+#endif
 		}
 
 		public bool IsArray
@@ -173,8 +201,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 		{
 			get
 			{
-				Type baseType = _type.BaseType;
-				return null == baseType
+#if DNXCORE50
+                Type baseType = _type.GetTypeInfo().BaseType;
+#else
+                Type baseType = _type.BaseType;
+#endif
+                return null == baseType
 				       	? null
 				       	: _provider.Map(baseType);
 			}
@@ -201,11 +233,16 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			if (external == null)
 				return false;
 
-			return _type.IsSubclassOf(external._type)
+#if DNXCORE50
+            return _type.GetTypeInfo().IsSubclassOf(external._type)
+                || (external.IsInterface && external._type.IsAssignableFrom(_type));
+#else
+            return _type.IsSubclassOf(external._type)
 				|| (external.IsInterface && external._type.IsAssignableFrom(_type));
-		}
+#endif
+        }
 
-		public virtual bool IsAssignableFrom(IType other)
+        public virtual bool IsAssignableFrom(IType other)
 		{
 			var external = other as ExternalType;
 			if (null == external)
@@ -308,9 +345,13 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			{
 				return GetTypeDepth(type.GetElementType());
 			}
-			if (type.IsInterface)
-			{
-				return GetInterfaceDepth(type);
+#if DNXCORE50
+            if (type.GetTypeInfo().IsInterface)
+#else
+            if (type.IsInterface)
+#endif
+            {
+                return GetInterfaceDepth(type);
 			}
 			return GetClassDepth(type);
 		}
@@ -321,8 +362,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 			Type objectType = Types.Object;
 			while (type != null && type != objectType)
 			{
-				type = type.BaseType;
-				++depth;
+#if DNXCORE50
+                type = type.GetTypeInfo().BaseType;
+#else
+                type = type.BaseType;
+#endif
+                ++depth;
 			}
 			return depth;
 		}
@@ -361,8 +406,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 		{
 			get
 			{
-				if (ActualType.IsGenericTypeDefinition)
-					return _genericTypeDefinitionInfo ?? (_genericTypeDefinitionInfo = new ExternalGenericTypeInfo(_provider, this));
+#if DNXCORE50
+                if (ActualType.GetTypeInfo().IsGenericTypeDefinition)
+#else
+                if (ActualType.IsGenericTypeDefinition)
+#endif
+                    return _genericTypeDefinitionInfo ?? (_genericTypeDefinitionInfo = new ExternalGenericTypeInfo(_provider, this));
 				return null;
 			}
 		}
@@ -372,8 +421,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 		{
 			get
 			{
-				if (ActualType.IsGenericType && !ActualType.IsGenericTypeDefinition)
-					return _genericTypeInfo ?? (_genericTypeInfo = new ExternalConstructedTypeInfo(_provider, this));
+#if DNXCORE50
+                if (ActualType.GetTypeInfo().IsGenericType && !ActualType.GetTypeInfo().IsGenericTypeDefinition)
+#else
+                if (ActualType.IsGenericType && !ActualType.IsGenericTypeDefinition)
+#endif
+                    return _genericTypeInfo ?? (_genericTypeInfo = new ExternalConstructedTypeInfo(_provider, this));
 				return null;
 			}
 		}

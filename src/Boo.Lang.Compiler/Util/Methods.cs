@@ -37,56 +37,96 @@ namespace Boo.Lang.Compiler.Util
 		
 		public static MethodInfo Of<T>(Func<T> value)
 		{
-			return value.Method;
-		}
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
 
-		public static MethodInfo Of<T1, TRet>(Func<T1, TRet> value)
+        public static MethodInfo Of<T1, TRet>(Func<T1, TRet> value)
 		{
-			return value.Method;
-		}
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
 
-		public static MethodInfo Of<T1, T2, TRet>(Func<T1, T2, TRet> value)
+        public static MethodInfo Of<T1, T2, TRet>(Func<T1, T2, TRet> value)
 		{
-			return value.Method;
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
 		}
 
 		public static MethodInfo Of<T1, T2, T3, TRet>(Func<T1, T2, T3, TRet> value)
 		{
-			return value.Method;
-		}
-		
-		public static MethodInfo Of<T1, T2, T3, T4, TRet>(Func<T1, T2, T3, T4, TRet> value)
-		{
-			return value.Method;
-		}
-
-		public static MethodInfo Of(Action value)
-		{
-			return value.Method;
-		}
-
-		public static MethodInfo Of<T>(Action<T> value)
-		{
-			return value.Method;
-		}
-
-		public static MethodInfo Of<T1, T2>(Action<T1, T2> value)
-		{
-			return value.Method;
-		}
-
-		public static MethodInfo Of<T1, T2, T3, T4>(Action<T1, T2, T3, T4> value)
-		{
-			return value.Method;
-		}
-
-        
-	public static MethodInfo Of<T1, T2, T3, T4, T5>(TAction<T1, T2, T3, T4, T5> value)
-        {
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
             return value.Method;
+#endif
         }
 
-		public delegate void TAction<T1, T2, T3, T4, T5>(T1 p1, T2 p2, T3 p3, T4 p4, T5 p5);
+        public static MethodInfo Of<T1, T2, T3, T4, TRet>(Func<T1, T2, T3, T4, TRet> value)
+		{
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
+
+        public static MethodInfo Of(Action value)
+		{
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
+
+        public static MethodInfo Of<T>(Action<T> value)
+		{
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
+
+        public static MethodInfo Of<T1, T2>(Action<T1, T2> value)
+		{
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
+
+        public static MethodInfo Of<T1, T2, T3, T4>(Action<T1, T2, T3, T4> value)
+		{
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
+
+
+        public static MethodInfo Of<T1, T2, T3, T4, T5>(TAction<T1, T2, T3, T4, T5> value)
+        {
+#if DNXCORE50
+            return value.GetMethodInfo();
+#else
+            return value.Method;
+#endif
+        }
+
+        public delegate void TAction<T1, T2, T3, T4, T5>(T1 p1, T2 p2, T3 p3, T4 p4, T5 p5);
 
 		public static MethodInfo InstanceActionOf<TInstance>(Expression<Func<TInstance, Action>> func)
 		{

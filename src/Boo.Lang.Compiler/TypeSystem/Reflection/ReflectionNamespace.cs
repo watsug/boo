@@ -30,6 +30,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Boo.Lang.Compiler.TypeSystem.Core;
 using Boo.Lang.Compiler.Util;
 
@@ -179,19 +180,31 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 
 		private static bool IsModule(Type type)
 		{
-			return type.IsClass
+#if DNXCORE50
+            return type.GetTypeInfo().IsClass
+                && type.GetTypeInfo().IsSealed
+                && !type.GetTypeInfo().IsNestedPublic
+                && HasModuleMarkerAttribute(type);
+#else
+            return type.IsClass
 				&& type.IsSealed
 				&& !type.IsNestedPublic
 				&& HasModuleMarkerAttribute(type);
-		}
+#endif
+        }
 
-		private static bool HasModuleMarkerAttribute(Type type)
+        private static bool HasModuleMarkerAttribute(Type type)
 		{
-			return MetadataUtil.IsAttributeDefined(type, Types.ModuleAttribute)
+#if DNXCORE50
+            return MetadataUtil.IsAttributeDefined(type.GetTypeInfo(), Types.ModuleAttribute)
+                || MetadataUtil.IsAttributeDefined(type.GetTypeInfo(), Types.ClrExtensionAttribute);
+#else
+            return MetadataUtil.IsAttributeDefined(type, Types.ModuleAttribute)
 				|| MetadataUtil.IsAttributeDefined(type, Types.ClrExtensionAttribute);
-		}
+#endif
+        }
 
-		private static List<Type> NewTypeList(string name)
+        private static List<Type> NewTypeList(string name)
 		{
 			return new List<Type>();
 		}

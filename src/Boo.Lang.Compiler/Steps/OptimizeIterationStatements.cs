@@ -28,6 +28,7 @@
 
 //Authored by Cameron Kenneth Knight: http://jira.codehaus.org/browse/BOO-137
 
+using System.Reflection;
 using Boo.Lang.Compiler.TypeSystem.Core;
 using Boo.Lang.Compiler.TypeSystem.Internal;
 using Boo.Lang.Compiler.Util;
@@ -57,9 +58,13 @@ namespace Boo.Lang.Compiler.Steps
 		override public void Initialize(CompilerContext context)
 		{
 			base.Initialize(context);
-			
-			Type builtins = typeof(Boo.Lang.Builtins);
-			_range_End = Map(builtins.GetMethod("range", new Type[] { Types.Int }));
+
+#if DNXCORE50
+            TypeInfo builtins = typeof(Boo.Lang.Builtins).GetTypeInfo();
+#else
+            Type builtins = typeof(Boo.Lang.Builtins);
+#endif
+            _range_End = Map(builtins.GetMethod("range", new Type[] { Types.Int }));
 			_range_Begin_End = Map(builtins.GetMethod("range", new Type[] { Types.Int, Types.Int }));
 			_range_Begin_End_Step = Map(builtins.GetMethod("range", new Type[] { Types.Int, Types.Int, Types.Int }));
 		}

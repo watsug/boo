@@ -179,8 +179,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 		private IType CreateEntityForType(Type type)
 		{
 			if (type.IsGenericParameter) return new ExternalGenericParameter(_provider, type);
-			if (type.IsSubclassOf(Types.MulticastDelegate)) return _provider.CreateEntityForCallableType(type);
-			return _provider.CreateEntityForRegularType(type);
+#if DNXCORE50
+            if (type.GetTypeInfo().IsSubclassOf(Types.MulticastDelegate)) return _provider.CreateEntityForCallableType(type);
+#else
+            if (type.IsSubclassOf(Types.MulticastDelegate)) return _provider.CreateEntityForCallableType(type);
+#endif
+            return _provider.CreateEntityForRegularType(type);
 		}
 
 	}

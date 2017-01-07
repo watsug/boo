@@ -28,6 +28,7 @@
 
 
 using System;
+using System.Reflection;
 using Boo.Lang.Compiler.Ast;
 using Boo.Lang.Compiler.MetaProgramming;
 using Boo.Lang.Compiler.TypeSystem.Internal;
@@ -69,10 +70,14 @@ namespace Boo.Lang.Compiler.Steps.MacroProcessing
 			Type enclosingType = Compile(node.DeclaringType);
 			if (enclosingType == null)
 				return null;
-			return enclosingType.GetNestedType(node.Name);
-		}
+#if DNXCORE50
+            return enclosingType.GetTypeInfo().GetNestedType(node.Name);
+#else
+            return enclosingType.GetNestedType(node.Name);
+#endif
+        }
 
-		private Type CompileRegularMacro(TypeDefinition node)
+        private Type CompileRegularMacro(TypeDefinition node)
 		{
 			TraceInfo("Compiling macro '{0}'", node);
 

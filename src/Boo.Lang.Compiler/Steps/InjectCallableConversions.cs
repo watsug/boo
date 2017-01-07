@@ -27,7 +27,9 @@
 #endregion
 
 using System.Linq;
+#if !DNXCORE50
 using System.Runtime.Remoting.Messaging;
+#endif
 using Boo.Lang.Compiler.TypeSystem.Builders;
 using Boo.Lang.Compiler.TypeSystem.Core;
 using Boo.Lang.Compiler.Util;
@@ -195,9 +197,11 @@ namespace Boo.Lang.Compiler.Steps
 			if (_asyncResultType != null)
 				return;
 
+#if !DNXCORE50
 			var type = typeof(AsyncResult);
 			_asyncResultType = TypeSystemServices.Map(type);
 			_asyncResultTypeAsyncDelegateGetter = TypeSystemServices.Map(Methods.GetterOf<AsyncResult, object>(r => r.AsyncDelegate));
+#endif
 		}
 		
 		public override void Dispose()

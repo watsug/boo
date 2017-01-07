@@ -26,6 +26,8 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
+using System;
+
 namespace Boo.Lang.Compiler.Steps
 {
 	using System.IO;
@@ -46,7 +48,8 @@ namespace Boo.Lang.Compiler.Steps
 
 		void Save(AssemblyBuilder builder, string filename)
 		{
-			switch (Parameters.Platform)
+#if !DNXCORE50
+            switch (Parameters.Platform)
 			{
 				case "x86":
 					builder.Save(filename, PortableExecutableKinds.Required32Bit, ImageFileMachine.I386);
@@ -61,6 +64,9 @@ namespace Boo.Lang.Compiler.Steps
 					builder.Save(filename);
 					break;
 			}
-		}
+#else
+            throw new NotSupportedException("Assembly rendering is not supported yet!");
+#endif
+        }
 	}
 }

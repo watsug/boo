@@ -12,7 +12,7 @@ namespace Boo.CoreCompat
             LoadContext = AssemblyLoadContext.GetLoadContext(typeof(AssemblyUtil).GetTypeInfo().Assembly);
         }
 
-        Assembly LoadFrom(string assemblyPath)
+        public static Assembly LoadFrom(string assemblyPath)
         {
             return LoadContext.LoadFromAssemblyPath(assemblyPath);
         }

@@ -65,9 +65,13 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 
 			foreach (Type type in types)
 			{
-				if (!type.IsPublic) continue;
+#if DNXCORE50
+                if (!type.GetTypeInfo().IsPublic) continue;
+#else
+                if (!type.IsPublic) continue;
+#endif
 
-				string ns = type.Namespace ?? string.Empty;
+                string ns = type.Namespace ?? string.Empty;
 				//retrieve the namespace only if we don't have it handy already
 				//usually we'll have it since GetExportedTypes() seems to export
 				//types in a sorted fashion.

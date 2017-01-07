@@ -26,6 +26,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
+using System.Linq;
 using Boo.Lang.Compiler.TypeSystem.Reflection;
 using Boo.Lang.Environments;
 
@@ -130,13 +131,18 @@ namespace Boo.Lang.Compiler.TypeSystem
 
 		private bool IsParamArray(ParameterInfo parameter)
 		{
-			/* Hack to fix problem with mono-1.1.8.* and older */
-			return parameter.ParameterType.IsArray
+#if DNXCORE50
+            return parameter.ParameterType.IsArray
+                && parameter.GetCustomAttributes(Types.ParamArrayAttribute, false).Count() > 0;
+#else
+            /* Hack to fix problem with mono-1.1.8.* and older */
+            return parameter.ParameterType.IsArray
 				&& parameter.GetCustomAttributes(Types.ParamArrayAttribute, false).Length > 0;
-		}
+#endif
+        }
 
-		
-		override public EntityType EntityType
+
+        override public EntityType EntityType
 		{
 			get { return EntityType.Method; }
 		}
@@ -186,15 +192,23 @@ namespace Boo.Lang.Compiler.TypeSystem
 			if (null == other) return false;
 			if (this == other) return true;
 
-			return _memberInfo.MethodHandle.Value == other._memberInfo.MethodHandle.Value;
+#if DNXCORE50
+		    return _memberInfo.MetadataToken == other._memberInfo.MetadataToken;
+#else
+            return _memberInfo.MethodHandle.Value == other._memberInfo.MethodHandle.Value;
+#endif
 		}
 
 		override public int GetHashCode()
 		{
-			return _memberInfo.MethodHandle.Value.GetHashCode();
+#if DNXCORE50
+		    return _memberInfo.MetadataToken;
+#else
+            return _memberInfo.MethodHandle.Value.GetHashCode();
+#endif
 		}
-		
-		override public string ToString()
+
+        override public string ToString()
 		{
 			return _memberInfo.ToString();
 		}
