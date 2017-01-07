@@ -75,7 +75,7 @@ namespace Boo.Lang.Compiler.Steps
 
 		private void InitializeInputTypes()
 		{
-			_inputTypes = Array.ConvertAll<ParameterDeclaration, IType>(
+			_inputTypes = Util.ArrayUtil.ConvertAll<ParameterDeclaration, IType>(
 				Closure.Parameters.ToArray(),
 				delegate(ParameterDeclaration pd) { return pd.Type == null ? null : pd.Type.Entity as IType; });
 		}

@@ -38,13 +38,20 @@ namespace Boo.Lang.Compiler.TypeSystem
 		
 		public ExternalGenericParameter(IReflectionTypeSystemProvider provider, Type type) : base(provider, type)
 		{
-			if (type.DeclaringMethod != null)
+#if DNXCORE50
+            if (type.GetTypeInfo().DeclaringMethod != null)
+			{
+				_declaringMethod = (IMethod)provider.Map(type.GetTypeInfo().DeclaringMethod);
+			}
+#else
+            if (type.DeclaringMethod != null)
 			{
 				_declaringMethod = (IMethod)provider.Map(type.DeclaringMethod);
 			}
-		}
-		
-		public int GenericParameterPosition
+#endif
+        }
+
+        public int GenericParameterPosition
 		{
 			get { return ActualType.GenericParameterPosition; }
 		}
@@ -67,8 +74,12 @@ namespace Boo.Lang.Compiler.TypeSystem
 		{
 			get
 			{
-				GenericParameterAttributes variance = ActualType.GenericParameterAttributes & GenericParameterAttributes.VarianceMask;
-				switch (variance)
+#if DNXCORE50
+                GenericParameterAttributes variance = ActualType.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.VarianceMask;
+#else
+                GenericParameterAttributes variance = ActualType.GenericParameterAttributes & GenericParameterAttributes.VarianceMask;
+#endif
+                switch (variance)
 				{
 					case GenericParameterAttributes.None:
 						return Variance.Invariant;
@@ -87,34 +98,50 @@ namespace Boo.Lang.Compiler.TypeSystem
 
 		public IType[] GetTypeConstraints()
 		{
-			return Array.ConvertAll<Type, IType>(
-				ActualType.GetGenericParameterConstraints(), 
-				_provider.Map);
+			return Util.ArrayUtil.ConvertAll<Type, IType>(
+#if DNXCORE50
+                ActualType.GetTypeInfo().GetGenericParameterConstraints(),
+#else
+                ActualType.GetGenericParameterConstraints(), 
+#endif
+                _provider.Map);
 		}
 
 		public bool MustHaveDefaultConstructor
 		{
 			get
 			{
-				return (ActualType.GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) == GenericParameterAttributes.DefaultConstructorConstraint;
-			}
-		}
+#if DNXCORE50
+                return (ActualType.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) == GenericParameterAttributes.DefaultConstructorConstraint;
+#else
+                return (ActualType.GenericParameterAttributes & GenericParameterAttributes.DefaultConstructorConstraint) == GenericParameterAttributes.DefaultConstructorConstraint;
+#endif
+            }
+        }
 
 		public override bool IsClass
 		{
 			get
 			{
-				return (ActualType.GenericParameterAttributes & GenericParameterAttributes.ReferenceTypeConstraint) == GenericParameterAttributes.ReferenceTypeConstraint;
-			}
-		}
+#if DNXCORE50
+                return (ActualType.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.ReferenceTypeConstraint) == GenericParameterAttributes.ReferenceTypeConstraint;
+#else
+                return (ActualType.GenericParameterAttributes & GenericParameterAttributes.ReferenceTypeConstraint) == GenericParameterAttributes.ReferenceTypeConstraint;
+#endif
+            }
+        }
 
 		public override bool IsValueType
 		{
 			get
 			{
-				return (ActualType.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) == GenericParameterAttributes.NotNullableValueTypeConstraint;
-			}
-		}
+#if DNXCORE50
+                return (ActualType.GetTypeInfo().GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) == GenericParameterAttributes.NotNullableValueTypeConstraint;
+#else
+                return (ActualType.GenericParameterAttributes & GenericParameterAttributes.NotNullableValueTypeConstraint) == GenericParameterAttributes.NotNullableValueTypeConstraint;
+#endif
+            }
+        }
 
 		public override string ToString()
 		{

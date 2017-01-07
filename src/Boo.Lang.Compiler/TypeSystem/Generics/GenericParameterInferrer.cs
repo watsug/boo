@@ -268,7 +268,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 		public IType[] GetInferredTypes()
 		{
-			return Array.ConvertAll<IGenericParameter, IType>(
+			return Util.ArrayUtil.ConvertAll<IGenericParameter, IType>(
 				GenericMethod.GenericInfo.GenericParameters,
 				GetInferredType);
 		}
@@ -320,7 +320,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 		private IType[] GetParameterTypes(CallableSignature signature)
 		{
-			return Array.ConvertAll<IParameter, IType>(
+			return Util.ArrayUtil.ConvertAll<IParameter, IType>(
 				signature.Parameters,
 				delegate(IParameter p) { return p.Type; });
 		}
@@ -328,7 +328,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 		private void InferenceStart()
 		{
 			string argumentsString = string.Join(
-				", ", Array.ConvertAll<TypedArgument, string>(
+				", ", Util.ArrayUtil.ConvertAll<TypedArgument, string>(
 				      	Arguments,
 				      	delegate(TypedArgument arg) { return arg.Expression.ToString(); }));
 

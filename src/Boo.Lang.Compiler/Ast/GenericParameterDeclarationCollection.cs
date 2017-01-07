@@ -42,7 +42,7 @@ namespace Boo.Lang.Compiler.Ast
 
 		public string ToCodeString()
 		{
-			string[] names = Array.ConvertAll<GenericParameterDeclaration, string>(
+			string[] names = Util.ArrayUtil.ConvertAll<GenericParameterDeclaration, string>(
 				ToArray(),
 				delegate(GenericParameterDeclaration gpd) { return gpd.Name; });
 

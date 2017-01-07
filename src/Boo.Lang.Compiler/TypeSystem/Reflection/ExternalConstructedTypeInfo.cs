@@ -26,14 +26,18 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
+using System.Reflection;
 using Boo.Lang.Compiler.TypeSystem.Generics;
 using Boo.Lang.Compiler.TypeSystem.Reflection;
 
 namespace Boo.Lang.Compiler.TypeSystem
 {
 	using System;
+#if DNXCORE50
+    using Util;
+#endif
 
-	public class ExternalConstructedTypeInfo : IConstructedTypeInfo
+    public class ExternalConstructedTypeInfo : IConstructedTypeInfo
 	{
 		ExternalType _type;
 		IReflectionTypeSystemProvider _tss;
@@ -69,20 +73,29 @@ namespace Boo.Lang.Compiler.TypeSystem
 			{
 				if (_arguments == null)
 				{
-					_arguments = Array.ConvertAll<Type, IType>(
+#if DNXCORE50
+                    _arguments = Util.ArrayUtil.ConvertAll<Type, IType>(
+                        _type.ActualType.GetTypeInfo().GetGenericArguments(), _tss.Map);
+#else
+                    _arguments = Util.ArrayUtil.ConvertAll<Type, IType>(
 						_type.ActualType.GetGenericArguments(), _tss.Map);
-				}
-				
-				return _arguments;
+#endif
+                }
+
+                return _arguments;
 			}
 		}
 					
 		public bool FullyConstructed	
 		{
-			get { return !_type.ActualType.ContainsGenericParameters; }
-		}
+#if DNXCORE50
+            get { return !_type.ActualType.GetTypeInfo().ContainsGenericParameters; }
+#else
+            get { return !_type.ActualType.ContainsGenericParameters; }
+#endif
+        }
 
-		public IMember UnMap(IMember mapped)
+        public IMember UnMap(IMember mapped)
 		{
 			return GenericMapping.UnMap(mapped);
 		}

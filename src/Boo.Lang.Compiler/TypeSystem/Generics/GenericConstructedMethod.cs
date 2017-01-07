@@ -74,7 +74,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 		private string BuildFullName()
 		{
-			string[] argumentNames = Array.ConvertAll<IType, string>(
+			string[] argumentNames = Util.ArrayUtil.ConvertAll<IType, string>(
 				GenericArguments,
 				delegate(IType t) { return t.FullName; });
 			

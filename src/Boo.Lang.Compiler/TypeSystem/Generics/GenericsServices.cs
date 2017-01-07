@@ -97,7 +97,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 					reportErrors = true;
 			}
 
-			IEntity[] constructedMatches = Array.ConvertAll<IEntity, IEntity>(matches.ToArray(), def => MakeGenericEntity(def, typeArguments));
+			IEntity[] constructedMatches = Util.ArrayUtil.ConvertAll<IEntity, IEntity>(matches.ToArray(), def => MakeGenericEntity(def, typeArguments));
 			return Entities.EntityFromList(constructedMatches);
 		}
 

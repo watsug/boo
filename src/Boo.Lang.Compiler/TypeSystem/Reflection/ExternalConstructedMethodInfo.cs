@@ -58,7 +58,7 @@ namespace Boo.Lang.Compiler.TypeSystem
 			{
 				if (_arguments == null)
 				{
-					_arguments = Array.ConvertAll<Type, IType>(
+					_arguments = Util.ArrayUtil.ConvertAll<Type, IType>(
 						_method.MethodInfo.GetGenericArguments(), _tss.Map);
 				}
 				

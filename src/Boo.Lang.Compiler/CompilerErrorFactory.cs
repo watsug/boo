@@ -984,7 +984,7 @@ namespace Boo.Lang.Compiler
 
 		private static CompilerError Instantiate(string code, LexicalInfo location, params object[] args)
 		{
-			return new CompilerError(code, location, Array.ConvertAll<object, string>(args, DisplayStringFor));
+			return new CompilerError(code, location, Util.ArrayUtil.ConvertAll<object, string>(args, DisplayStringFor));
 		}
 
 		internal static string DisplayStringFor(object o)

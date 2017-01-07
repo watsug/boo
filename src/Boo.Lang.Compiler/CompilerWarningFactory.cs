@@ -224,7 +224,7 @@ namespace Boo.Lang.Compiler
 
 		private static CompilerWarning Instantiate(string code, LexicalInfo location, params object[] args)
 		{
-			return new CompilerWarning(code, location, Array.ConvertAll<object, string>(args, CompilerErrorFactory.DisplayStringFor));
+			return new CompilerWarning(code, location, Util.ArrayUtil.ConvertAll<object, string>(args, CompilerErrorFactory.DisplayStringFor));
 		}
 
 		private static string NodeTypeString(Node node)

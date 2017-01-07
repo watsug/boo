@@ -29,7 +29,9 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+#if !DNXCORE50
 using System.Diagnostics.SymbolStore;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -211,9 +213,11 @@ namespace Boo.Lang.Compiler.Steps
 
             // Define the unmanaged version information resource, which 
             // contains the attribute informaion applied earlier
+#if !DNXCORE50
             _asmBuilder.DefineVersionInfoResource();
+#endif
 
-			_moduleBuilder.CreateGlobalFunctions(); //setup global .data
+            _moduleBuilder.CreateGlobalFunctions(); //setup global .data
 		}
 
 		void GatherAssemblyAttributes()
@@ -585,8 +589,12 @@ namespace Boo.Lang.Compiler.Steps
 			var typeBuilder = GetTypeBuilder(node);
 			foreach (EnumMember member in node.Members)
 			{
-				var field = typeBuilder.DefineField(member.Name, typeBuilder,
-													FieldAttributes.Public |
+#if DNXCORE50
+                var field = typeBuilder.DefineField(member.Name, typeBuilder.AsType(),
+#else
+                var field = typeBuilder.DefineField(member.Name, typeBuilder,
+#endif
+                FieldAttributes.Public |
 													FieldAttributes.Static |
 													FieldAttributes.Literal);
 				field.SetConstant(InitializerValueOf(member, node));
@@ -779,7 +787,9 @@ namespace Boo.Lang.Compiler.Steps
 			info.LocalBuilder = _il.DeclareLocal(GetSystemType(local), info.Type.IsPointer);
 			if (Parameters.Debug)
 			{
-				info.LocalBuilder.SetLocalSymInfo(local.Name);
+#if !DNXCORE50
+                info.LocalBuilder.SetLocalSymInfo(local.Name);
+#endif
 			}
 		}
 
@@ -988,7 +998,6 @@ namespace Boo.Lang.Compiler.Steps
 		override public void OnExpressionStatement(ExpressionStatement node)
 		{
 			EmitDebugInfo(node);
-
 			base.OnExpressionStatement(node);
 
 			// if the type of the inner expression is not
@@ -1034,7 +1043,6 @@ namespace Boo.Lang.Compiler.Steps
 		override public void OnGotoStatement(GotoStatement node)
 		{
 			EmitDebugInfo(node);
-
 			InternalLabel label = (InternalLabel)GetEntity(node.Label);
 			int gotoDepth = AstAnnotations.GetTryBlockDepth(node);
 			int targetDepth = AstAnnotations.GetTryBlockDepth(label.LabelStatement);
@@ -1080,8 +1088,8 @@ namespace Boo.Lang.Compiler.Steps
 		{
 			Label endLabel = _il.DefineLabel();
 
-			EmitDebugInfo(node);
-			EmitBranchFalse(node.Condition, endLabel);
+            EmitDebugInfo(node);
+            EmitBranchFalse(node.Condition, endLabel);
 
 			node.TrueBlock.Accept(this);
 			if (null != node.FalseBlock)
@@ -1351,8 +1359,8 @@ namespace Boo.Lang.Compiler.Steps
 
 		private void EmitGoTo(Label label, Node debugInfo)
 		{
-			EmitDebugInfo(debugInfo);
-			_il.Emit(InTryInLoop() ? OpCodes.Leave : OpCodes.Br, label);
+            EmitDebugInfo(debugInfo);
+            _il.Emit(InTryInLoop() ? OpCodes.Leave : OpCodes.Br, label);
 		}
 
 		override public void OnContinueStatement(ContinueStatement node)
@@ -1375,7 +1383,7 @@ namespace Boo.Lang.Compiler.Steps
 
 			_il.MarkLabel(conditionLabel);
 			EmitDebugInfo(node);
-			EmitBranchTrue(node.Condition, bodyLabel);
+            EmitBranchTrue(node.Condition, bodyLabel);
 			Visit(node.OrBlock);
 			Visit(node.ThenBlock);
 			_il.MarkLabel(endLabel);
@@ -2461,8 +2469,12 @@ namespace Boo.Lang.Compiler.Steps
 
 			if (targetType.IsValueType)
 			{
-				if (methodToBeInvoked.DeclaringType.IsValueType)
-					LoadAddress(target);
+#if DNXCORE50
+                if (methodToBeInvoked.DeclaringType.GetTypeInfo().IsValueType)
+#else
+                if (methodToBeInvoked.DeclaringType.IsValueType)
+#endif
+                    LoadAddress(target);
 				else
 				{
 					Visit(target);
@@ -2598,8 +2610,12 @@ namespace Boo.Lang.Compiler.Steps
 			LoadAddressForInitObj(argument);
 			var expressionType = GetExpressionType(argument);
 			System.Type type = GetSystemType(expressionType);
-			Debug.Assert(type.IsValueType || (type.IsGenericParameter && expressionType.IsValueType));
-			_il.Emit(OpCodes.Initobj, type);
+#if DNXCORE50
+            Debug.Assert(type.GetTypeInfo().IsValueType || (type.IsGenericParameter && expressionType.IsValueType));
+#else
+            Debug.Assert(type.IsValueType || (type.IsGenericParameter && expressionType.IsValueType));
+#endif
+            _il.Emit(OpCodes.Initobj, type);
 			PushVoid();
 		}
 
@@ -3602,8 +3618,12 @@ namespace Boo.Lang.Compiler.Steps
 				{
 					Expression target = ((MemberReferenceExpression)reference).Target;
 					targetType = target.ExpressionType;
-					if (setMethod.DeclaringType.IsValueType || targetType is IGenericParameter)
-						LoadAddress(target);
+#if DNXCORE50
+                    if (setMethod.DeclaringType.GetTypeInfo().IsValueType || targetType is IGenericParameter)
+#else
+                    if (setMethod.DeclaringType.IsValueType || targetType is IGenericParameter)
+#endif
+                        LoadAddress(target);
 					else
 					{
 						callOpCode = GetCallOpCode(target, property.GetSetMethod());
@@ -3638,13 +3658,18 @@ namespace Boo.Lang.Compiler.Steps
 			}
 		}
 
-		bool EmitDebugInfo(Node node)
+        bool EmitDebugInfo(Node node)
 		{
+#if !DNXCORE50
 			if (!Parameters.Debug)
 				return false;
 			return EmitDebugInfo(node, node);
-		}
+#else
+            return false;
+#endif
+        }
 
+#if !DNXCORE50
 		private const int _DBG_SYMBOLS_QUEUE_CAPACITY = 5;
 
 		private System.Collections.Generic.Queue<LexicalInfo> _dbgSymbols = new System.Collections.Generic.Queue<LexicalInfo>(_DBG_SYMBOLS_QUEUE_CAPACITY);
@@ -3677,11 +3702,6 @@ namespace Boo.Lang.Compiler.Steps
 			return true;
 		}
 
-		private void EmitNop()
-		{
-			_il.Emit(OpCodes.Nop);
-		}
-
 		private ISymbolDocumentWriter GetDocumentWriter(string fname)
 		{
 			ISymbolDocumentWriter writer = GetCachedDocumentWriter(fname);
@@ -3701,8 +3721,14 @@ namespace Boo.Lang.Compiler.Steps
 		{
 			return (ISymbolDocumentWriter) _symbolDocWriters[fname];
 		}
+#endif
 
-		bool IsBoolOrInt(IType type)
+        private void EmitNop()
+        {
+            _il.Emit(OpCodes.Nop);
+        }
+
+        bool IsBoolOrInt(IType type)
 		{
 			return TypeSystemServices.BoolType == type ||
 				TypeSystemServices.IntType == type;
@@ -4549,8 +4575,8 @@ namespace Boo.Lang.Compiler.Steps
 		/// </summary>
 		private MethodInfo GetConstructedMethodInfo(IConstructedMethodInfo constructedInfo)
 		{
-			Type[] arguments = Array.ConvertAll<IType, Type>(constructedInfo.GenericArguments, GetSystemType);
-			return GetMethodInfo(constructedInfo.GenericDefinition).MakeGenericMethod(arguments);
+            Type[] arguments = ArrayUtil.ConvertAll<IType, Type>(constructedInfo.GenericArguments, GetSystemType);
+            return GetMethodInfo(constructedInfo.GenericDefinition).MakeGenericMethod(arguments);
 		}
 
 		/// <summary>
@@ -4559,13 +4585,17 @@ namespace Boo.Lang.Compiler.Steps
 		private FieldInfo GetMappedFieldInfo(IType targetType, IField source)
 		{
 			FieldInfo fi = GetFieldInfo(source);
-			if (!fi.DeclaringType.IsGenericTypeDefinition)
-			{
-				// HACK: .NET Reflection doesn't allow calling TypeBuilder.GetField(Type, FieldInfo)
-				// on types that aren't generic definitions (like open constructed types), so we have
-				// to manually find the corresponding FieldInfo on the declaring type's definition
-				// before mapping it
-				Type definition = fi.DeclaringType.GetGenericTypeDefinition();
+#if DNXCORE50
+            if (!fi.DeclaringType.GetTypeInfo().IsGenericTypeDefinition)
+#else
+            if (!fi.DeclaringType.IsGenericTypeDefinition)
+#endif
+            {
+                // HACK: .NET Reflection doesn't allow calling TypeBuilder.GetField(Type, FieldInfo)
+                // on types that aren't generic definitions (like open constructed types), so we have
+                // to manually find the corresponding FieldInfo on the declaring type's definition
+                // before mapping it
+                Type definition = fi.DeclaringType.GetGenericTypeDefinition();
 				fi = definition.GetField(fi.Name);
 			}
 			return TypeBuilder.GetField(GetSystemType(targetType), fi);
@@ -4577,8 +4607,12 @@ namespace Boo.Lang.Compiler.Steps
 		private MethodInfo GetMappedMethodInfo(IType targetType, IMethod source)
 		{
 			var mi = GetMethodInfo(source);
-			if (mi.DeclaringType.IsGenericTypeDefinition)
-				return GetConstructedMethodInfo(targetType, mi);
+#if DNXCORE50
+            if (mi.DeclaringType.GetTypeInfo().IsGenericTypeDefinition)
+#else
+            if (mi.DeclaringType.IsGenericTypeDefinition)
+#endif
+                return GetConstructedMethodInfo(targetType, mi);
 
 			// HACK: .NET Reflection doesn't allow calling TypeBuilder.GetMethod(Type, MethodInfo)
 			// on types that aren't generic definitions (like open constructed types), so we have to
@@ -4600,13 +4634,17 @@ namespace Boo.Lang.Compiler.Steps
 		private ConstructorInfo GetMappedConstructorInfo(IType targetType, IConstructor source)
 		{
 			ConstructorInfo ci = GetConstructorInfo(source);
-			if (!ci.DeclaringType.IsGenericTypeDefinition)
-			{
-				// HACK: .NET Reflection doesn't allow calling
-				// TypeBuilder.GetConstructor(Type, ConstructorInfo) on types that aren't generic
-				// definitions, so we have to manually find the corresponding ConstructorInfo on the
-				// declaring type's definition before mapping it
-				Type definition = ci.DeclaringType.GetGenericTypeDefinition();
+#if DNXCORE50
+            if (!ci.DeclaringType.GetTypeInfo().IsGenericTypeDefinition)
+#else
+            if (!ci.DeclaringType.IsGenericTypeDefinition)
+#endif
+            {
+                // HACK: .NET Reflection doesn't allow calling
+                // TypeBuilder.GetConstructor(Type, ConstructorInfo) on types that aren't generic
+                // definitions, so we have to manually find the corresponding ConstructorInfo on the
+                // declaring type's definition before mapping it
+                Type definition = ci.DeclaringType.GetGenericTypeDefinition();
 				ci = Array.Find<ConstructorInfo>(
 					definition.GetConstructors(),
 					delegate(ConstructorInfo other) { return other.MetadataToken == ci.MetadataToken; });
@@ -4651,9 +4689,9 @@ namespace Boo.Lang.Compiler.Steps
 
 			if (entity.ConstructedInfo != null)
 			{
-				// Type is a constructed generic type - create it using its definition's system type
-				Type[] arguments = Array.ConvertAll<IType, Type>(entity.ConstructedInfo.GenericArguments, GetSystemType);
-				return GetSystemType(entity.ConstructedInfo.GenericDefinition).MakeGenericType(arguments);
+                // Type is a constructed generic type - create it using its definition's system type
+                Type[] arguments = ArrayUtil.ConvertAll<IType, Type>(entity.ConstructedInfo.GenericArguments, GetSystemType);
+                return GetSystemType(entity.ConstructedInfo.GenericDefinition).MakeGenericType(arguments);
 			}
 
 			if (entity.IsNull())
@@ -4667,8 +4705,12 @@ namespace Boo.Lang.Compiler.Steps
 				TypeDefinition typedef = ((AbstractInternalType) entity).TypeDefinition;
 				var type = (Type)GetBuilder(typedef);
 
-				if (null != entity.GenericInfo && !type.IsGenericType) //hu-oh, early-bound
-					DefineGenericParameters(typedef);
+#if DNXCORE50
+                if (null != entity.GenericInfo && !type.GetTypeInfo().IsGenericType) //hu-oh, early-bound
+#else
+                if (null != entity.GenericInfo && !type.IsGenericType) //hu-oh, early-bound
+#endif
+                    DefineGenericParameters(typedef);
 
 				if (entity.IsPointer && null != type)
 					return type.MakePointerType();
@@ -5026,7 +5068,7 @@ namespace Boo.Lang.Compiler.Steps
 		/// </summary>
 		void DefineGenericParameters(TypeBuilder builder, GenericParameterDeclaration[] parameters)
 		{
-			string[] names = Array.ConvertAll<GenericParameterDeclaration, string>(
+			string[] names = ArrayUtil.ConvertAll<GenericParameterDeclaration, string>(
 				parameters,
 				delegate(GenericParameterDeclaration gpd) { return gpd.Name; });
 
@@ -5040,7 +5082,7 @@ namespace Boo.Lang.Compiler.Steps
 		/// </summary>
 		void DefineGenericParameters(MethodBuilder builder, GenericParameterDeclaration[] parameters)
 		{
-			string[] names = Array.ConvertAll<GenericParameterDeclaration, string>(
+			string[] names = ArrayUtil.ConvertAll<GenericParameterDeclaration, string>(
 				parameters,
 				delegate(GenericParameterDeclaration gpd) { return gpd.Name; });
 
@@ -5067,7 +5109,7 @@ namespace Boo.Lang.Compiler.Steps
 			}
 
 			// Set interface constraints
-			Type[] interfaceTypes = Array.ConvertAll<IType, Type>(
+			Type[] interfaceTypes = ArrayUtil.ConvertAll<IType, Type>(
 				parameter.GetInterfaces(), GetSystemType);
 
 			builder.SetInterfaceConstraints(interfaceTypes);
@@ -5182,11 +5224,15 @@ namespace Boo.Lang.Compiler.Steps
 			{
 				Type type = GetSystemType(baseType);
 
-				// For some reason you can't call IsClass on constructed types created at compile time,
-				// so we'll ask the generic definition instead
-				if ((type.IsGenericType && type.GetGenericTypeDefinition().IsClass) || (type.IsClass))
-				{
-					typeBuilder.SetParent(type);
+                // For some reason you can't call IsClass on constructed types created at compile time,
+                // so we'll ask the generic definition instead
+#if DNXCORE50
+                if ((type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition().GetTypeInfo().IsClass) || (type.GetTypeInfo().IsClass))
+#else
+                if ((type.IsGenericType && type.GetGenericTypeDefinition().IsClass) || (type.IsClass))
+#endif
+                {
+                    typeBuilder.SetParent(type);
 				}
 				else
 				{
@@ -5613,7 +5659,7 @@ namespace Boo.Lang.Compiler.Steps
 		{
 			var version = GetAssemblyAttributeValue("System.Reflection.AssemblyVersionAttribute");
 			if (version == null)
-				return new Version();
+				return new Version(0, 0);
 
 			/* 1.0.* -- BUILD -- based on days since January 1, 2000
 			 * 1.0.0.* -- REVISION -- based on seconds since midnight, January 1, 2000, divided by 2			 *

@@ -250,7 +250,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Internal
 
 		IGenericParameter[] IGenericParametersProvider.GenericParameters
 		{
-			get { return Array.ConvertAll(_node.GenericParameters.ToArray(), gpd => (IGenericParameter) gpd.Entity); }
+			get { return Util.ArrayUtil.ConvertAll(_node.GenericParameters.ToArray(), gpd => (IGenericParameter) gpd.Entity); }
 		}
 
 		IType IGenericTypeInfo.ConstructType(IType[] arguments)

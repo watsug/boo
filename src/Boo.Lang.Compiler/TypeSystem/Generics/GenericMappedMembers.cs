@@ -254,7 +254,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 			{
 				if (_typeParameters == null)
 				{
-					_typeParameters = Array.ConvertAll<IGenericParameter, IGenericParameter>(
+					_typeParameters = Util.ArrayUtil.ConvertAll<IGenericParameter, IGenericParameter>(
 						SourceMember.GenericInfo.GenericParameters,
 						GenericMapping.MapGenericParameter);
 				}
@@ -283,7 +283,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 			{
 				sb.Append("[of ");
 
-				string[] genericParameterNames = Array.ConvertAll<IGenericParameter, string>(
+				string[] genericParameterNames = Util.ArrayUtil.ConvertAll<IGenericParameter, string>(
 					GenericInfo.GenericParameters,
 					delegate(IGenericParameter gp) { return gp.Name; });
 
@@ -293,7 +293,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 			sb.Append("(");
 
-			string[] parameterTypeNames = Array.ConvertAll<IParameter, string>(
+			string[] parameterTypeNames = Util.ArrayUtil.ConvertAll<IParameter, string>(
 				GetParameters(),
 				delegate(IParameter p) { return p.Type.Name; });
 

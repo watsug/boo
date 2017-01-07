@@ -59,7 +59,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 		public override IType[] GetTypeConstraints()
 		{
-			return Array.ConvertAll<IType, IType>(Source.GetTypeConstraints(), _mapping.MapType);
+			return Util.ArrayUtil.ConvertAll<IType, IType>(Source.GetTypeConstraints(), _mapping.MapType);
 		}
 
 		public override IEntity DeclaringEntity

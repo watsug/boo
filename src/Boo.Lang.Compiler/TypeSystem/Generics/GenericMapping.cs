@@ -190,7 +190,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 		private IEntity MapAmbiguousEntity(Ambiguous source)
 		{
 			// Map each individual entity in the ambiguous list 
-			return new Ambiguous(Array.ConvertAll<IEntity, IEntity>(source.Entities, Map));
+			return new Ambiguous(Util.ArrayUtil.ConvertAll<IEntity, IEntity>(source.Entities, Map));
 		}
 
 		/// <summary>

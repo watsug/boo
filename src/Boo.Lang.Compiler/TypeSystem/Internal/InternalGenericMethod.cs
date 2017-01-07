@@ -57,7 +57,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Internal
 			get {
 				return _genericParameters ??
 				       (_genericParameters =
-				        Array.ConvertAll(Method.GenericParameters.ToArray(), gpd => (IGenericParameter) gpd.Entity));
+                        Util.ArrayUtil.ConvertAll(Method.GenericParameters.ToArray(), gpd => (IGenericParameter) gpd.Entity));
 			}
 		}
 		

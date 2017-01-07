@@ -104,7 +104,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 		{
 			IType mappedDefinition = MapType(sourceType.ConstructedInfo.GenericDefinition);
 
-			IType[] mappedArguments = Array.ConvertAll<IType, IType>(
+			IType[] mappedArguments = Util.ArrayUtil.ConvertAll<IType, IType>(
 				sourceType.ConstructedInfo.GenericArguments,
 				MapType);
 
@@ -115,7 +115,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 		internal IParameter[] MapParameters(IParameter[] parameters)
 		{
-			return Array.ConvertAll<IParameter, IParameter>(parameters, MapParameter);
+			return Util.ArrayUtil.ConvertAll<IParameter, IParameter>(parameters, MapParameter);
 		}
 
 		internal IParameter MapParameter(IParameter parameter)

@@ -15,6 +15,6 @@
     }
   },
   "buildOptions": {
-    "define": [ "DNXCORE50", " NO_SYSTEM_PROCESS" ]
+    "define": [ "DNXCORE50", "NO_SYSTEM_PROCESS" ]
   }
 }

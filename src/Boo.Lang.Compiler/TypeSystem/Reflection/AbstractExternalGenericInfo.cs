@@ -52,7 +52,7 @@ namespace Boo.Lang.Compiler.TypeSystem
 			{
 				if (null == _parameters)
 				{
-					_parameters = Array.ConvertAll<Type, ExternalGenericParameter>(
+					_parameters = Util.ArrayUtil.ConvertAll<Type, ExternalGenericParameter>(
 						GetActualGenericParameters(),
 						delegate(Type t) { return (ExternalGenericParameter)_provider.Map(t); });
 				}
@@ -64,7 +64,7 @@ namespace Boo.Lang.Compiler.TypeSystem
 		{
 			if (Array.TrueForAll(arguments, IsExternal))
 			{
-				Type[] actualTypes = Array.ConvertAll<IType, Type>(arguments, GetSystemType);
+				Type[] actualTypes = Util.ArrayUtil.ConvertAll<IType, Type>(arguments, GetSystemType);
 
 				return ConstructExternalEntity(actualTypes);
 			}

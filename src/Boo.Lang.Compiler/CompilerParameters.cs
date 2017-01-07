@@ -356,14 +356,18 @@ namespace Boo.Lang.Compiler
 
 		private static string GetSystemDir()
 		{
-			return Path.GetDirectoryName(typeof(string).Assembly.Location);
-		}
+#if DNXCORE50
+            return Path.GetDirectoryName(typeof(string).GetTypeInfo().Assembly.Location);
+#else
+            return Path.GetDirectoryName(typeof(string).Assembly.Location);
+#endif
+        }
 
-		/// <summary>
-		/// Max number of iterations for the application of AST attributes and the
-		/// expansion of macros.		
-		/// </summary>
-		public int MaxExpansionIterations { get; set; }
+        /// <summary>
+        /// Max number of iterations for the application of AST attributes and the
+        /// expansion of macros.		
+        /// </summary>
+        public int MaxExpansionIterations { get; set; }
 
 		public CompilerInputCollection Input
 		{

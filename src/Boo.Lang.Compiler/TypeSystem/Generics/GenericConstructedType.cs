@@ -151,7 +151,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Generics
 
 		public IType[] GetInterfaces()
 		{
-			return Array.ConvertAll<IType, IType>(
+			return ArrayUtil.ConvertAll<IType, IType>(
 				_definition.GetInterfaces(), 
 				GenericMapping.MapType);
 		}
