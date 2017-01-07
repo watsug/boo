@@ -127,9 +127,13 @@ namespace Boo.Lang.Compiler
 
 		public void LoadDefaultReferences()
 		{
-			//boo.lang.dll
-			_booAssembly = typeof(Builtins).Assembly;
-			_compilerReferences.Add(_booAssembly);
+            //boo.lang.dll
+#if DNXCORE50
+            _booAssembly = typeof(Builtins).GetTypeInfo().Assembly;
+#else
+            _booAssembly = typeof(Builtins).Assembly;
+#endif
+            _compilerReferences.Add(_booAssembly);
 
 			//boo.lang.extensions.dll
 			//try loading extensions next to Boo.Lang (in the same directory)
@@ -137,11 +141,15 @@ namespace Boo.Lang.Compiler
 			if (extensionsAssembly != null)
 				_compilerReferences.Add(extensionsAssembly);
 
-			//boo.lang.compiler.dll
-			_compilerReferences.Add(GetType().Assembly);
+            //boo.lang.compiler.dll
+#if DNXCORE50
+            _compilerReferences.Add(GetType().GetTypeInfo().Assembly);
+#else
+            _compilerReferences.Add(GetType().Assembly);
+#endif
 
-			//mscorlib
-			_compilerReferences.Add(LoadAssembly("mscorlib", true));
+            //mscorlib
+            _compilerReferences.Add(LoadAssembly("mscorlib", true));
 			//System
 			_compilerReferences.Add(LoadAssembly("System", true));
 			//System.Core
@@ -290,9 +298,9 @@ namespace Boo.Lang.Compiler
 			assemblyName = NormalizeAssemblyName(assemblyName);
 			// This is an intentional attempt to load an assembly with partial name
 			// so ignore the compiler warning
-			#pragma warning disable 618	
+#pragma warning disable 618
 			var assembly = Permissions.WithDiscoveryPermission(()=> Assembly.LoadWithPartialName(assemblyName));
-			#pragma warning restore 618
+#pragma warning restore 618
 			return assembly ?? Assembly.Load(assemblyName);
 		}
 

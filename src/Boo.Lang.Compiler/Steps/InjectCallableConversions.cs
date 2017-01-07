@@ -200,7 +200,7 @@ namespace Boo.Lang.Compiler.Steps
 			_asyncResultTypeAsyncDelegateGetter = TypeSystemServices.Map(Methods.GetterOf<AsyncResult, object>(r => r.AsyncDelegate));
 		}
 		
-		override public void Dispose()
+		public override void Dispose()
 		{
 			_asyncResultType = null;
 			_asyncResultTypeAsyncDelegateGetter = null;
@@ -208,7 +208,7 @@ namespace Boo.Lang.Compiler.Steps
 			base.Dispose();
 		}
 		
-		override public void OnMethod(Method node)
+		public override void OnMethod(Method node)
 		{
 			_current = GetEntity(node);
 			Visit(node.Body);

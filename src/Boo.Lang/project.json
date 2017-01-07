@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "buildOptions": {
     "debugType": "portable",
@@ -10,7 +10,6 @@
     "netstandard1.6": {
       "imports": "dnxcore50",
       "dependencies": {
-        "NETStandard.Library": "1.6.1",
         "System.Collections.NonGeneric": "4.3.0",
         "System.Reflection.Emit": "4.3.0",
         "System.Reflection.Emit.Lightweight": "4.3.0",
@@ -20,6 +19,7 @@
   },
   "runtimes": { "win": {} },
   "dependencies": {
-    "Boo.CoreCompat": "1.0.0-*"
+    "Boo.CoreCompat": "1.0.0-*",
+    "NETStandard.Library": "1.6.1"
   }
 }

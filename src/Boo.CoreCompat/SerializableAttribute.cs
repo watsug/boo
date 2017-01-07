@@ -8,5 +8,9 @@ namespace System
 namespace System.Runtime.Serialization
 {
     using System;
+    // to prevent treating this namespace as empty
+    public class NoDeclaration
+    {
+    }
 }
 #endif

@@ -5,7 +5,9 @@
     "Boo.Lang": "1.0.0-*",
     "NETStandard.Library": "1.6.1",
     "System.Diagnostics.Process": "4.3.0",
-    "System.Xml.XmlSerializer": "4.0.11"
+    "System.Diagnostics.TraceSource": "4.3.0",
+    "System.Threading.Thread": "4.3.0",
+    "System.Xml.XmlSerializer": "4.3.0"
   },
   "frameworks": {
     "netstandard1.6": {
@@ -13,6 +15,6 @@
     }
   },
   "buildOptions": {
-    "define": [ "DNXCORE50" ]
+    "define": [ "DNXCORE50", " NO_SYSTEM_PROCESS" ]
   }
 }
