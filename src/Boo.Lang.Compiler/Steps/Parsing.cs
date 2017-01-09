@@ -92,15 +92,23 @@ namespace Boo.Lang.Compiler.Steps
 			var parserLocation = thisLocation.EndsWith("Boo.Lang.Compiler.dll", StringComparison.OrdinalIgnoreCase)
 				? thisLocation.Substring(0, thisLocation.Length - "Boo.Lang.Compiler.dll".Length) + "Boo.Lang.Parser.dll"
 				: "";
-			return File.Exists(parserLocation) ? Assembly.LoadFrom(parserLocation) : LoadParserAssemblyByName();
-		}
+#if DNXCORE50
+            return File.Exists(parserLocation) ? CoreCompat.AssemblyUtil.LoadFrom(parserLocation) : LoadParserAssemblyByName();
+#else
+            return File.Exists(parserLocation) ? Assembly.LoadFrom(parserLocation) : LoadParserAssemblyByName();
+#endif
+        }
 
-		private static Assembly LoadParserAssemblyByName()
+        private static Assembly LoadParserAssemblyByName()
 		{
-			return Assembly.Load(ThisAssembly().FullName.Replace("Boo.Lang.Compiler", "Boo.Lang.Parser"));
-		}
+#if DNXCORE50
+            return Assembly.Load(new AssemblyName(ThisAssembly().FullName.Replace("Boo.Lang.Compiler", "Boo.Lang.Parser")));
+#else
+            return Assembly.Load(ThisAssembly().FullName.Replace("Boo.Lang.Compiler", "Boo.Lang.Parser"));
+#endif
+        }
 
-		private static Assembly ThisAssembly()
+        private static Assembly ThisAssembly()
 		{
 #if DNXCORE50
             return typeof(Parsing).GetTypeInfo().Assembly;

@@ -134,8 +134,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Reflection
 		{
 			AssertAssembly(mi);
 			if (mi.MemberType == MemberTypes.NestedType)
-				return Map((Type)mi);
-			return _memberCache.Invoke(mi);
+#if DNXCORE50
+                return Map((Type)mi);
+#else
+                return Map((Type)mi);
+#endif
+            return _memberCache.Invoke(mi);
 		}
 
 		private void AssertAssembly(MemberInfo member)

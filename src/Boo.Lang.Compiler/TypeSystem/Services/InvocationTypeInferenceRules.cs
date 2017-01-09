@@ -20,8 +20,12 @@ namespace Boo.Lang.Compiler.TypeSystem.Services
 
 		protected string TypeInferenceRuleFor(MethodBase method, Type attributeType)
 		{
-			var rule = System.Attribute.GetCustomAttribute(method, attributeType);
-			if (rule != null)
+#if DNXCORE50
+		    var rule = CustomAttributeExtensions.GetCustomAttribute(method, attributeType);
+#else
+            var rule = System.Attribute.GetCustomAttribute(method, attributeType);
+#endif
+            if (rule != null)
 				return rule.ToString();
 			return null;
 		}
@@ -163,7 +167,7 @@ namespace Boo.Lang.Compiler.TypeSystem.Services
 		private InvocationTypeInferenceRule ResolveRule(MethodInvocationExpression invocation, IMethod method, string rule)
 		{
 			var ruleImpl = typeof(BuiltinRules).GetMethod(rule);
-			if (ruleImpl != null)
+            if (ruleImpl != null)
 				return (InvocationTypeInferenceRule)Delegate.CreateDelegate(typeof(InvocationTypeInferenceRule), ruleImpl);
 
 			Warnings.Add(CompilerWarningFactory.CustomWarning(invocation, string.Format("Unknown type inference rule '{0}' on method '{1}'.", rule, method)));

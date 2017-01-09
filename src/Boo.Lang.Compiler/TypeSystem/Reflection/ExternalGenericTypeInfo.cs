@@ -26,6 +26,7 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
+using System.Reflection;
 using Boo.Lang.Compiler.TypeSystem.Generics;
 using Boo.Lang.Compiler.TypeSystem.Reflection;
 
@@ -50,10 +51,14 @@ namespace Boo.Lang.Compiler.TypeSystem
 
 		protected override Type[] GetActualGenericParameters()
 		{
-			return _type.ActualType.GetGenericArguments();
-		}
-		
-		protected override IType ConstructExternalEntity(Type[] arguments)
+#if DNXCORE50
+            return _type.ActualType.GetTypeInfo().GetGenericArguments();
+#else
+            return _type.ActualType.GetGenericArguments();
+#endif
+        }
+
+        protected override IType ConstructExternalEntity(Type[] arguments)
 		{
 			return _provider.Map(_type.ActualType.MakeGenericType(arguments));
 		}

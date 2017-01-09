@@ -165,7 +165,34 @@ namespace Boo.Lang.Compiler.Steps.MacroProcessing
 
 		private MemberInfo[] FindMembers(ReferenceExpression name)
 		{
-			return _type.FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, System.Type.FilterName, name.Name);
+#if DNXCORE50
+		    MemberFilter filter = delegate(MemberInfo m, object filterCriteria)
+		    {
+		        if (filterCriteria == null || !(filterCriteria is string))
+		        {
+		            throw new System.Reflection.InvalidFilterCriteriaException("RFLCT.FltCritString");
+		        }
+		        string text = (string) filterCriteria;
+		        text = text.Trim();
+		        string text2 = m.Name;
+		        if (m.MemberType == MemberTypes.NestedType)
+		        {
+		            text2 = text2.Substring(text2.LastIndexOf('+') + 1);
+		        }
+		        if (text.Length > 0 && text[text.Length - 1] == '*')
+		        {
+		            text = text.Substring(0, text.Length - 1);
+		            return text2.StartsWith(text, StringComparison.Ordinal);
+		        }
+		        return text2.Equals(text);
+		    };
+
+		    return _type.GetTypeInfo()
+		        .FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, filter,
+		            name.Name);
+#else
+            return _type.FindMembers(MemberTypes.Property | MemberTypes.Field, BindingFlags.Instance | BindingFlags.Public, System.Type.FilterName, name.Name);
+#endif
 		}
 	}
 

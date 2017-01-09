@@ -170,8 +170,12 @@ namespace Boo.Lang.Compiler
 			return Permissions.WithDiscoveryPermission(() =>
 			{
 				var path = Path.Combine(Path.GetDirectoryName(_booAssembly.Location), booLangExtensionsDll);
-				return File.Exists(path) ? AssemblyReferenceFor(Assembly.LoadFrom(path)) : null;
-			}) ?? LoadAssembly(booLangExtensionsDll, false);
+#if DNXCORE50
+                return File.Exists(path) ? AssemblyReferenceFor(AssemblyUtil.LoadFrom(path)) : null;
+#else
+                return File.Exists(path) ? AssemblyReferenceFor(Assembly.LoadFrom(path)) : null;
+#endif
+            }) ?? LoadAssembly(booLangExtensionsDll, false);
 		}
 
 		public Assembly BooAssembly
@@ -224,9 +228,13 @@ namespace Boo.Lang.Compiler
 			try
 			{
 				if (assembly.IndexOfAny(new char[] {'/', '\\'}) != -1)
-					a = Assembly.LoadFrom(assembly);
-				else
-					a = LoadAssemblyFromGac(assembly);
+#if DNXCORE50
+                    a = AssemblyUtil.LoadFrom(assembly);
+#else
+                    a = Assembly.LoadFrom(assembly);
+#endif
+                else
+                    a = LoadAssemblyFromGac(assembly);
 			}
 			catch (FileNotFoundException /*ignored*/)
 			{
@@ -235,14 +243,22 @@ namespace Boo.Lang.Compiler
 			catch (BadImageFormatException e)
 			{
 				if (throwOnError)
-					throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_BadFormat, e.FusionLog), e);
-			}
-			catch (FileLoadException e)
+#if DNXCORE50
+                    throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_BadFormat, e.Message), e);
+#else
+                    throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_BadFormat, e.FusionLog), e);
+#endif
+            }
+            catch (FileLoadException e)
 			{
 				if (throwOnError)
-					throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_UnableToLoadAssembly, e.FusionLog), e);
-			}
-			catch (ArgumentNullException e)
+#if DNXCORE50
+                    throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_UnableToLoadAssembly, e.Message), e);
+#else
+                    throw new ApplicationException(string.Format(Boo.Lang.Resources.StringResources.BooC_UnableToLoadAssembly, e.FusionLog), e);
+#endif
+            }
+            catch (ArgumentNullException e)
 			{
 				if (throwOnError)
 					throw new ApplicationException(Boo.Lang.Resources.StringResources.BooC_NullAssembly, e);
@@ -310,12 +326,16 @@ namespace Boo.Lang.Compiler
 		private static Assembly LoadAssemblyFromGac(string assemblyName)
 		{
 			assemblyName = NormalizeAssemblyName(assemblyName);
-			// This is an intentional attempt to load an assembly with partial name
-			// so ignore the compiler warning
+            // This is an intentional attempt to load an assembly with partial name
+            // so ignore the compiler warning
 #pragma warning disable 618
-			var assembly = Permissions.WithDiscoveryPermission(()=> Assembly.LoadWithPartialName(assemblyName));
+#if DNXCORE50
+		    Assembly assembly = null;
+#else
+            var assembly = Permissions.WithDiscoveryPermission(()=> Assembly.LoadWithPartialName(assemblyName));
+#endif
 #pragma warning restore 618
-			return assembly ?? Assembly.Load(assemblyName);
+            return assembly ?? Assembly.Load(new AssemblyName(assemblyName));
 		}
 
 		private static string NormalizeAssemblyName(string assembly)
